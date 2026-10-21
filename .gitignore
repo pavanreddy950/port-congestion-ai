@@ -6,3 +6,4 @@ data/download_log.txt
 .env
 .streamlit/secrets.toml
 data/streamlit_log.txt
+reports/*.pdf

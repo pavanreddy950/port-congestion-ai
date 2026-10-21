@@ -6,7 +6,7 @@ Aiqon AI Internship take-home. This system estimates, for a ship arriving at a p
 - **Model:** a bagged ensemble of 25 LightGBM classifiers, recalibrated with Platt scaling, with SHAP explanations and split conformal prediction sets.
 - **AI Port Analyst:** an LLM agent (OpenAI function calling) that answers questions by calling the model as a tool, so every number it quotes comes from the model.
 - **Evaluation:** trained on Jan–Feb and tested on March (time-based split), compared against 3 baselines.
-- **Report:** [`reports/Port_Congestion_Report.pdf`](reports/Port_Congestion_Report.pdf)
+- **Report:** the 2–3 page technical report is submitted separately as a PDF. Run `python -m src.make_report` to rebuild it into `reports/`.
 
 ## Results (March 2023 test set, 1,114 port calls)
 
@@ -22,7 +22,7 @@ Our model also has the best Brier score (0.177 after recalibration; port baselin
 - High-confidence predictions are **89% accurate**, against about 51–55% for medium and low confidence, so the confidence score carries real information.
 - **Conformal prediction:** 68% of arrivals get a single-outcome set (delay or no delay), which is right 79% of the time. Coverage is 85.5% against the 90% target, because congestion fell from 35% to 27% between the calibration weeks and March.
 - The top drivers are the **queue of same-type ships per berth** and **recent delays of same-type ships**. Weather adds risk mainly when the queue is already long (a weather × traffic interaction).
-- The gain over the per-port baseline is modest, and Houston is hard to predict within the port. The [report](reports/Port_Congestion_Report.pdf) explains why: much tanker anchorage time is commercial waiting, which AIS cannot see.
+- The gain over the per-port baseline is modest, and Houston is hard to predict within the port. The report explains why: much tanker anchorage time is commercial waiting, which AIS cannot see.
 
 ## Definition of congestion
 
@@ -45,7 +45,7 @@ src/
   charts.py         interactive charts and the ship map used by the demo
 app.py              Streamlit demo
 data/processed/     port_calls.csv (final dataset), weather, hourly port state
-reports/            metrics.json, test predictions, figures, PDF report
+reports/            metrics.json, test predictions, figures
 ```
 
 ## How to run

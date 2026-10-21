@@ -27,6 +27,8 @@ def load():
     state = pd.read_parquet(PROCESSED_DIR / "port_hourly_state.parquet")
     ship_sample = pd.read_parquet(PROCESSED_DIR / "map_sample.parquet")
     interaction = pd.read_csv(REPORTS_DIR / "interaction_queue_weather.csv")
+    from src import analyst
+    analyst._data()[0].shap_values(test.head(1))   # build the AI analyst's SHAP explainers once, at startup
     return model, test, metrics, calls, state, ship_sample, interaction
 
 

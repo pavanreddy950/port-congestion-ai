@@ -86,7 +86,7 @@ OPENAI_API_KEY=sk-...
 python -m src.analyst "Which Houston tankers arriving on 9 March 2023 are most at risk, and why?"
 ```
 
-The app's 🤖 tab reads the same key. The default model is `gpt-5-mini`; add `OPENAI_MODEL=...` to `.env` to change it.
+The app's 🤖 tab reads the same key. The default model is `gpt-4.1-mini`; add `OPENAI_MODEL=...` to `.env` to change it.
 
 **Full pipeline from raw AIS data.** This downloads about 29 GB in total, but only a few MB is kept. It takes 2–5 h depending on your connection.
 

@@ -21,6 +21,7 @@ import shap
 from sklearn.linear_model import LogisticRegression
 
 CONFORMAL_ALPHA = 0.10   # prediction sets aim to contain the true outcome 90% of the time
+_EXPLAINERS: dict[int, list] = {}   # SHAP explainers per model object; slow to build, so built once
 
 NUMERIC_FEATURES = [
     "queue_anchored", "berths_occupied", "occupancy_ratio", "queue_per_berth", "queue_change_24h",
@@ -163,10 +164,15 @@ class CongestionModel:
         """Average SHAP contributions (log-odds) across ensemble members."""
         X = prepare(df, self.categories)
         total = np.zeros((len(X), len(FEATURES)))
-        for m in self.members:
-            with warnings.catch_warnings():  # shap notes its LightGBM output format changed
+        with warnings.catch_warnings():  # shap notes its LightGBM output format changed
+            warnings.simplefilter("ignore", UserWarning)
+            if id(self) not in _EXPLAINERS:
+                _EXPLAINERS[id(self)] = [shap.TreeExplainer(m) for m in self.members]
+            explainers = _EXPLAINERS[id(self)]
+        for explainer in explainers:
+            with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)
-                sv = shap.TreeExplainer(m).shap_values(X)
+                sv = explainer.shap_values(X)
             sv = sv[1] if isinstance(sv, list) else sv
             total += sv
         return pd.DataFrame(total / len(self.members), columns=FEATURES, index=df.index)

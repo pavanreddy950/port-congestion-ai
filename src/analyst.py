@@ -5,7 +5,7 @@ The LLM never invents numbers: every risk, confidence, reason and outcome it
 quotes comes from a tool below, which runs the trained model on real data.
 
 Needs an OpenAI API key in the OPENAI_API_KEY environment variable.
-Optional: OPENAI_MODEL (default gpt-5-mini).
+Optional: OPENAI_MODEL (default gpt-4.1-mini).
 
 Run:  python -m src.analyst "Which Houston tankers arriving on 9 March are at risk, and why?"
 """
@@ -20,7 +20,7 @@ import pandas as pd
 from src.config import MODELS_DIR, PROCESSED_DIR, REPORTS_DIR
 from src.model import FEATURE_TEXT, explain_row, recommend, summarise
 
-DEFAULT_MODEL = "gpt-5-mini"
+DEFAULT_MODEL = "gpt-4.1-mini"   # fast; reasoning models such as gpt-5-mini are slower here
 MAX_TOOL_ROUNDS = 6
 
 SYSTEM_PROMPT = """You are a port operations analyst helping shipping planners.
@@ -76,12 +76,19 @@ def find_arrivals(port: str, date: str | None = None, vessel_group: str | None =
         d = d[d["arrival_time"].dt.date == pd.Timestamp(date).date()]
     if vessel_group:
         d = d[d["vessel_group"] == vessel_group]
-    d = d[d["probability"] >= min_risk].sort_values("probability", ascending=False)
-    rows = [{"visit_id": int(r.visit_id), "arrival_time_utc": f"{r.arrival_time:%Y-%m-%d %H:%M}",
-             "vessel_group": r.vessel_group, "MMSI": int(r.MMSI), "risk": round(float(r.probability), 3),
-             "confidence_band": r.confidence_band, "actual_wait_h": round(float(r.anchor_wait_h), 1)}
-            for r in d.head(limit).itertuples()]
-    return {"port": port, "date": date, "matching_arrivals": len(d), "arrivals": rows}
+    d = d[d["probability"] >= min_risk].sort_values("probability", ascending=False).head(limit)
+    rows = []
+    if len(d):
+        model, *_ = _data()
+        shap_rows = model.shap_values(d)   # one batch call explains every listed arrival
+        for (_, r), (_, sv) in zip(d.iterrows(), shap_rows.iterrows()):
+            drivers = explain_row(r, sv, top_k=3)
+            rows.append({"visit_id": int(r.visit_id), "arrival_time_utc": f"{r.arrival_time:%Y-%m-%d %H:%M}",
+                         "vessel_group": r.vessel_group, "MMSI": int(r.MMSI), "risk": round(float(r.probability), 3),
+                         "flagged": bool(r.probability >= model.threshold), "confidence_band": r.confidence_band,
+                         "prediction_set_90pct": r.prediction_set, "top_reasons": [x["text"] for x in drivers],
+                         "actual_wait_h": round(float(r.anchor_wait_h), 1), "actually_congested": bool(r.congested)})
+    return {"port": port, "date": date, "arrivals": rows}
 
 
 def explain_arrival(visit_id: int) -> dict:
@@ -146,7 +153,9 @@ PORT_ENUM = {"type": "string", "enum": ["Houston", "LA_LongBeach", "NY_NJ", "Sav
 TOOLS = [
     {"type": "function", "function": {
         "name": "find_arrivals",
-        "description": "List March 2023 arrivals at a port, highest predicted risk first.",
+        "description": "List March 2023 arrivals at a port, highest predicted risk first, with each one's risk, "
+                       "top reasons and actual outcome. Usually enough on its own; use explain_arrival only for the "
+                       "full detail (summary, suggested action) of a specific arrival.",
         "parameters": {"type": "object", "properties": {
             "port": PORT_ENUM,
             "date": {"type": "string", "description": "YYYY-MM-DD, between 2023-03-01 and 2023-03-31"},

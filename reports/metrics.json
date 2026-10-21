@@ -1,0 +1,126 @@
+{
+  "models": {
+    "Baseline: port historical rate": {
+      "roc_auc": 0.729,
+      "pr_auc": 0.421,
+      "brier": 0.178,
+      "precision": 0.346,
+      "recall": 0.98,
+      "f1": 0.512,
+      "threshold": 0.149
+    },
+    "Baseline: rule on same-type queue per berth": {
+      "roc_auc": 0.663,
+      "pr_auc": 0.381,
+      "brier": 0.307,
+      "precision": 0.454,
+      "recall": 0.597,
+      "f1": 0.516,
+      "threshold": 0.5
+    },
+    "Logistic regression": {
+      "roc_auc": 0.75,
+      "pr_auc": 0.455,
+      "brier": 0.204,
+      "precision": 0.422,
+      "recall": 0.81,
+      "f1": 0.555,
+      "threshold": 0.45
+    },
+    "LightGBM ensemble (ours)": {
+      "roc_auc": 0.752,
+      "pr_auc": 0.462,
+      "brier": 0.177,
+      "precision": 0.431,
+      "recall": 0.725,
+      "f1": 0.54,
+      "threshold": 0.3
+    }
+  },
+  "confidence_bands": {
+    "High": {
+      "n": 407,
+      "accuracy": 0.894
+    },
+    "Low": {
+      "n": 285,
+      "accuracy": 0.551
+    },
+    "Medium": {
+      "n": 422,
+      "accuracy": 0.514
+    }
+  },
+  "per_port": {
+    "Houston": {
+      "n": 519.0,
+      "congested_rate": 0.441,
+      "roc_auc": 0.576
+    },
+    "LA_LongBeach": {
+      "n": 210.0,
+      "congested_rate": 0.195,
+      "roc_auc": 0.78
+    },
+    "NY_NJ": {
+      "n": 251.0,
+      "congested_rate": 0.024,
+      "roc_auc": 0.654
+    },
+    "Savannah": {
+      "n": 134.0,
+      "congested_rate": 0.216,
+      "roc_auc": 0.516
+    }
+  },
+  "shap_importance": {
+    "queue_per_berth_same_type": 0.6398,
+    "recent_congested_share_7d_same_type": 0.4989,
+    "recent_avg_wait_7d_same_type": 0.2332,
+    "draft": 0.2163,
+    "queue_same_type": 0.1468,
+    "recent_avg_wait_7d": 0.1401,
+    "length": 0.1376,
+    "recent_congested_share_7d": 0.1311,
+    "hour_of_day": 0.094,
+    "berths_same_type": 0.075,
+    "wind_speed_10m": 0.0748,
+    "max_gust_next_24h": 0.0712,
+    "wave_height": 0.0701,
+    "occupancy_same_type": 0.0683,
+    "occupancy_ratio": 0.0605,
+    "wind_gusts_10m": 0.0565,
+    "arrivals_24h": 0.0564,
+    "queue_per_berth": 0.0545,
+    "arrivals_7d": 0.048,
+    "berths_occupied": 0.0449,
+    "queue_change_24h": 0.0436,
+    "port": 0.0364,
+    "queue_anchored": 0.0326,
+    "max_wave_next_24h": 0.0239,
+    "day_of_week": 0.0231,
+    "precipitation": 0.0135,
+    "vessel_group": 0.0111,
+    "is_weekend": 0.0018
+  },
+  "calibration": {
+    "brier_raw": 0.18161244573706187,
+    "brier_calibrated": 0.1774086677094262,
+    "ece_raw": 0.092872045898583,
+    "ece_calibrated": 0.09118047625163483
+  },
+  "conformal": {
+    "alpha": 0.1,
+    "q": 0.6707474630462348,
+    "coverage": 0.855475763016158,
+    "share_single": 0.6831238779174147,
+    "single_accuracy": 0.7884362680683311,
+    "set_counts": {
+      "no delay": 641,
+      "either": 353,
+      "delay": 120
+    }
+  },
+  "n_train": 2530,
+  "n_test": 1114
+}

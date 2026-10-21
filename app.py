@@ -218,8 +218,11 @@ with tab_ai:
 
     st.write("Ask about March 2023 arrivals in plain English. The AI (OpenAI function calling) answers by calling "
              "the congestion model as a tool, so every number comes from the model, not from the AI.")
-    key = os.getenv("OPENAI_API_KEY") or st.text_input("OpenAI API key", type="password",
-                                                       help="Used only for this session; never saved.")
+    key = os.getenv("OPENAI_API_KEY", "")
+    key = key if key.startswith("sk-") else None   # ignore the .env placeholder
+    if not key:
+        st.warning("No OpenAI API key found. Put OPENAI_API_KEY=sk-... in a .env file in the project folder "
+                   "and restart the app.")
     examples = ["Which Houston tankers arriving on 9 March 2023 are most at risk, and why?",
                 "Explain visit 5389 and what the planner should do.",
                 "For visit 5389, what if the same-type queue per berth dropped to 0.2?",
@@ -236,7 +239,7 @@ with tab_ai:
     question = st.chat_input("Ask the port analyst...")
     if question:
         if not key:
-            st.warning("Add an OpenAI API key above (or set OPENAI_API_KEY) to use the analyst.")
+            st.warning("The analyst needs OPENAI_API_KEY in the .env file.")
         else:
             from openai import OpenAI
             st.session_state.chat.append(("user", question, None))

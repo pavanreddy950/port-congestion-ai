@@ -1,7 +1,16 @@
 """Shared configuration: paths, ports of interest, and AIS filters."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Secrets such as OPENAI_API_KEY live in a local .env file (never committed).
+_env = ROOT / ".env"
+if _env.exists():
+    for _line in _env.read_text(encoding="utf-8").splitlines():
+        _key, _sep, _value = _line.partition("=")
+        if _sep and not _line.lstrip().startswith("#"):
+            os.environ.setdefault(_key.strip(), _value.strip().strip('"').strip("'"))
 DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"            # filtered daily AIS parquet files
 PROCESSED_DIR = DATA_DIR / "processed"

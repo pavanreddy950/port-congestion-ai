@@ -76,12 +76,17 @@ python -m src.predict_one 5389    # predict a specific arrival by visit_id
 
 **AI Port Analyst (optional; needs an OpenAI API key):**
 
+Copy `.env.example` to `.env` and put your key in it (`.env` is git-ignored, so the key never reaches GitHub):
+
 ```bash
-# PowerShell:  $env:OPENAI_API_KEY = "sk-..."     macOS/Linux:  export OPENAI_API_KEY=sk-...
+OPENAI_API_KEY=sk-...
+```
+
+```bash
 python -m src.analyst "Which Houston tankers arriving on 9 March 2023 are most at risk, and why?"
 ```
 
-The key can also be pasted into the app's AI tab. It is used only for that session and is never saved. The default model is `gpt-5-mini`; set `OPENAI_MODEL` to change it.
+The app's 🤖 tab reads the same key. The default model is `gpt-5-mini`; add `OPENAI_MODEL=...` to `.env` to change it.
 
 **Full pipeline from raw AIS data.** This downloads about 29 GB in total, but only a few MB is kept. It takes 2–5 h depending on your connection.
 
